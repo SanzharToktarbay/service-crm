@@ -13,6 +13,8 @@ class ClientAdmin(admin.ModelAdmin):
     list_filter = ("status", "source")
     search_fields = ("first_name", "last_name", "phone")
     inlines = [InteractionInline]
+    list_display = ("first_name", "last_name", "phone", "status", "manager", "created_at")
+    list_filter = ("status", "source", "manager")
 
 
 @admin.register(Interaction)

@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Service CRM{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  {% if user.is_authenticated %}
+  <header class="topbar">
+    <a class="logo" href="{% url 'clients:list' %}">Service CRM</a>
+        <nav class="nav">
+      <a href="{% url 'clients:list' %}">Клиенты</a>
+      {% if user.is_staff %}
+        <a href="{% url 'admin:index' %}">Админка</a>
+      {% endif %}
+    </nav>
+    <div class="user">
+      <span>{{ user.get_full_name|default:user.username }}</span>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-link">Выйти</button>
+      </form>
+    </div>
+  </header>
+  {% endif %}
+
+  <main class="container">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

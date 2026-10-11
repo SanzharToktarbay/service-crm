@@ -6,7 +6,7 @@ from tasks.models import Task
 
 class InteractionInline(admin.TabularInline):
     model = Interaction
-    extra = 1
+    extra = 0
 
 
 class DealInline(admin.TabularInline):

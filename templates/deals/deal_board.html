@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Сделки — Service CRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>Сделки</h1>
+  <a href="{% url 'deals:create' %}" class="btn">+ Новая сделка</a>
+</div>
+
+<div class="board">
+  {% for column in columns %}
+    <div class="board-column">
+      <div class="board-head">
+        <span class="badge badge-{{ column.stage }}">{{ column.label }}</span>
+        <span class="muted">{{ column.deals|length }} · {{ column.total|floatformat:"0g" }} ₸</span>
+      </div>
+      {% for deal in column.deals %}
+        <a href="{% url 'deals:update' deal.pk %}" class="deal-card">
+          <div class="deal-title">{{ deal.title }}</div>
+          <div class="muted">{{ deal.client }}</div>
+          <div class="deal-amount">{{ deal.amount|floatformat:"0g" }} ₸</div>
+        </a>
+      {% empty %}
+        <p class="muted board-empty">Пусто</p>
+      {% endfor %}
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

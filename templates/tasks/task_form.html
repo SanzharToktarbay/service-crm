@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Новая задача — Service CRM{% endblock %}
+
+{% block content %}
+<a href="{% url 'tasks:list' %}" class="back">← Все задачи</a>
+
+<div class="card form-card">
+  <h1>Новая задача</h1>
+  <form method="post" class="stack" novalidate>
+    {% csrf_token %}
+    {% include "includes/form_fields.html" %}
+    <button type="submit" class="btn">Создать</button>
+  </form>
+</div>
+{% endblock %}

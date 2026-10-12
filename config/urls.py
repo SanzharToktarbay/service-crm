@@ -6,5 +6,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),
     path("clients/", include("clients.urls")),
+    path("deals/", include("deals.urls")),
+    path("tasks/", include("tasks.urls")),
     path("", RedirectView.as_view(pattern_name="clients:list", permanent=False)),
 ]

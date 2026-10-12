@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Задачи — Service CRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>{% if user.is_staff %}Все задачи{% else %}Мои задачи{% endif %}</h1>
+  <a href="{% url 'tasks:create' %}" class="btn">+ Новая задача</a>
+</div>
+
+<div class="tabs">
+  <a href="?show=open" class="{% if show != 'done' %}active{% endif %}">Открытые</a>
+  <a href="?show=done" class="{% if show == 'done' %}active{% endif %}">Выполненные</a>
+</div>
+
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Задача</th>
+        <th>Клиент</th>
+        <th>Срок</th>
+        <th>Приоритет</th>
+        {% if user.is_staff %}<th>Исполнитель</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+        <tr>
+          <td>
+            <form method="post" action="{% url 'tasks:toggle' task.pk %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button type="submit" class="check {% if task.is_done %}checked{% endif %}" title="Отметить">✓</button>
+            </form>
+          </td>
+          <td class="{% if task.is_done %}done{% endif %}">{{ task.title }}</td>
+          <td>
+            {% if task.client %}
+              <a href="{{ task.client.get_absolute_url }}">{{ task.client }}</a>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td class="{% if task.is_overdue %}overdue{% endif %}">
+            {{ task.due_at|date:"d.m.Y H:i" }}{% if task.is_overdue %} · просрочена{% endif %}
+          </td>
+          <td><span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span></td>
+          {% if user.is_staff %}
+            <td>{{ task.assignee.get_full_name|default:task.assignee.username }}</td>
+          {% endif %}
+        </tr>
+      {% empty %}
+        <tr><td colspan="6" class="empty">Задач нет</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

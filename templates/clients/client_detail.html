@@ -60,10 +60,13 @@
 
 <div class="grid">
   <section class="card">
-    <h2>Сделки</h2>
+    <div class="card-head">
+      <h2>Сделки</h2>
+      <a href="{% url 'deals:create' %}?client={{ client.pk }}">+ Добавить</a>
+    </div>
     {% for deal in deals %}
       <div class="row-item">
-        <span>{{ deal.title }}</span>
+        <a href="{% url 'deals:update' deal.pk %}">{{ deal.title }}</a>
         <span>{{ deal.amount|floatformat:"0g" }} ₸</span>
         <span class="badge badge-{{ deal.stage }}">{{ deal.get_stage_display }}</span>
       </div>
@@ -73,7 +76,10 @@
   </section>
 
   <section class="card">
-    <h2>Задачи</h2>
+    <div class="card-head">
+      <h2>Задачи</h2>
+      <a href="{% url 'tasks:create' %}?client={{ client.pk }}">+ Добавить</a>
+    </div>
     {% for task in tasks %}
       <div class="row-item {% if task.is_done %}done{% endif %}">
         <span>{{ task.title }}</span>

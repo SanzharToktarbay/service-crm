@@ -10,3 +10,13 @@ class ManagerScopedMixin:
 
     def get_queryset(self):
         return scope_for_user(super().get_queryset(), self.request.user, self.manager_field)
+
+
+class OwnerOnCreateMixin:
+    """При создании через API менеджер автоматически становится владельцем записи."""
+
+    def perform_create(self, serializer):
+        if self.request.user.is_staff:
+            serializer.save()
+        else:
+            serializer.save(**{self.manager_field: self.request.user})

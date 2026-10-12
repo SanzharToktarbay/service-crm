@@ -5,6 +5,7 @@
 {% block content %}
 <div class="page-head">
   <h1>Клиенты</h1>
+  <a href="{% url 'clients:create' %}" class="btn">+ Новый клиент</a>
 </div>
 
 <form method="get" class="filters">
@@ -36,7 +37,7 @@
     <tbody>
       {% for client in clients %}
         <tr>
-          <td>{{ client }}</td>
+          <td><a href="{% url 'clients:detail' client.pk %}">{{ client }}</a></td>
           <td>{{ client.phone }}</td>
           <td><span class="badge badge-{{ client.status }}">{{ client.get_status_display }}</span></td>
           <td>{{ client.source|default:"—" }}</td>

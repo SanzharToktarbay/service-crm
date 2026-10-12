@@ -1,4 +1,5 @@
 import re
+from django.urls import reverse
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -46,7 +47,10 @@ class Client(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}".strip()
-
+    
+    def get_absolute_url(self):
+        return reverse("clients:detail", kwargs={"pk": self.pk})
+    
     def clean(self):
         try:
             self.phone = normalize_phone(self.phone)

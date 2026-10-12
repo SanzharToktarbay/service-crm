@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}{{ client }} — Service CRM{% endblock %}
+
+{% block content %}
+<a href="{% url 'clients:list' %}" class="back">← Все клиенты</a>
+
+<div class="page-head">
+  <h1>
+    {{ client }}
+    <span class="badge badge-{{ client.status }}">{{ client.get_status_display }}</span>
+  </h1>
+  <a href="{% url 'clients:update' client.pk %}" class="btn">Редактировать</a>
+</div>
+
+<div class="grid">
+  <section class="card">
+    <h2>Контакты</h2>
+    <dl class="props">
+      <dt>Телефон</dt><dd>{{ client.phone }}</dd>
+      <dt>Email</dt><dd>{{ client.email|default:"—" }}</dd>
+      <dt>Источник</dt><dd>{{ client.source|default:"—" }}</dd>
+      <dt>Менеджер</dt>
+      <dd>
+        {% if client.manager %}
+          {{ client.manager.get_full_name|default:client.manager.username }}
+        {% else %}
+          —
+        {% endif %}
+      </dd>
+      <dt>Создан</dt><dd>{{ client.created_at|date:"d.m.Y H:i" }}</dd>
+    </dl>
+  </section>
+
+  <section class="card">
+    <h2>Новое взаимодействие</h2>
+    <form method="post" action="{% url 'clients:interaction_create' client.pk %}" class="stack">
+      {% csrf_token %}
+      {{ interaction_form.type }}
+      {{ interaction_form.happened_at }}
+      {{ interaction_form.comment }}
+      <button type="submit" class="btn">Добавить</button>
+    </form>
+  </section>
+</div>
+
+<section class="card">
+  <h2>История ({{ interactions|length }})</h2>
+  {% for item in interactions %}
+    <div class="timeline-item">
+      <div class="timeline-meta">
+        <strong>{{ item.get_type_display }}</strong> · {{ item.happened_at|date:"d.m.Y H:i" }}
+      </div>
+      {% if item.comment %}<div>{{ item.comment|linebreaksbr }}</div>{% endif %}
+    </div>
+  {% empty %}
+    <p class="muted">Пока нет взаимодействий</p>
+  {% endfor %}
+</section>
+
+<div class="grid">
+  <section class="card">
+    <h2>Сделки</h2>
+    {% for deal in deals %}
+      <div class="row-item">
+        <span>{{ deal.title }}</span>
+        <span>{{ deal.amount|floatformat:"0g" }} ₸</span>
+        <span class="badge badge-{{ deal.stage }}">{{ deal.get_stage_display }}</span>
+      </div>
+    {% empty %}
+      <p class="muted">Сделок нет</p>
+    {% endfor %}
+  </section>
+
+  <section class="card">
+    <h2>Задачи</h2>
+    {% for task in tasks %}
+      <div class="row-item {% if task.is_done %}done{% endif %}">
+        <span>{{ task.title }}</span>
+        <span class="{% if task.is_overdue %}overdue{% endif %}">{{ task.due_at|date:"d.m H:i" }}</span>
+        <span>{% if task.is_done %}✓{% else %}{{ task.get_priority_display }}{% endif %}</span>
+      </div>
+    {% empty %}
+      <p class="muted">Задач нет</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

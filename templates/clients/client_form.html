@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Редактирование{% else %}Новый клиент{% endif %} — Service CRM{% endblock %}
+
+{% block content %}
+<a href="{% if object %}{% url 'clients:detail' object.pk %}{% else %}{% url 'clients:list' %}{% endif %}" class="back">← Назад</a>
+
+<div class="card form-card">
+  <h1>{% if object %}Редактирование: {{ object }}{% else %}Новый клиент{% endif %}</h1>
+  <form method="post" class="stack" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <label>
+        {{ field.label }}
+        {{ field }}
+        {% for error in field.errors %}
+          <span class="error">{{ error }}</span>
+        {% endfor %}
+      </label>
+    {% endfor %}
+    <button type="submit" class="btn">Сохранить</button>
+  </form>
+</div>
+{% endblock %}

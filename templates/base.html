@@ -10,8 +10,9 @@
 <body>
   {% if user.is_authenticated %}
   <header class="topbar">
-    <a class="logo" href="{% url 'clients:list' %}">Service CRM</a>
+    <a class="logo" href="{% url 'dashboard' %}">Service CRM</a>
         <nav class="nav">
+            <a href="{% url 'dashboard' %}">Главная</a>
             <a href="{% url 'clients:list' %}">Клиенты</a>
             <a href="{% url 'deals:board' %}">Сделки</a>
             <a href="{% url 'tasks:list' %}">Задачи</a>

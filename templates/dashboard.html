@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Главная — Service CRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>Добрый день, {{ user.first_name|default:user.username }}</h1>
+</div>
+
+<div class="stats">
+  <a href="{% url 'clients:list' %}" class="stat">
+    <div class="stat-label">Клиенты</div>
+    <div class="stat-value">{{ clients_stats.total }}</div>
+    <div class="muted">из них лидов: {{ clients_stats.leads }}</div>
+  </a>
+
+  <a href="{% url 'deals:board' %}" class="stat">
+    <div class="stat-label">Сделки в работе</div>
+    <div class="stat-value">{{ deals_stats.open_count }}</div>
+    <div class="muted">на {{ deals_stats.open_sum|default:0|floatformat:"0g" }} ₸</div>
+  </a>
+
+  <div class="stat">
+    <div class="stat-label">Выиграно в этом месяце</div>
+    <div class="stat-value">{{ deals_stats.won_sum|default:0|floatformat:"0g" }} ₸</div>
+    <div class="muted">
+      {% if conversion is not None %}
+        конверсия {{ conversion }}%
+      {% else %}
+        закрытых сделок пока нет
+      {% endif %}
+    </div>
+  </div>
+
+  <a href="{% url 'tasks:list' %}" class="stat {% if tasks_stats.overdue %}stat-alert{% endif %}">
+    <div class="stat-label">Открытые задачи</div>
+    <div class="stat-value">{{ tasks_stats.total }}</div>
+    <div class="muted">просрочено: {{ tasks_stats.overdue }}</div>
+  </a>
+</div>
+
+<div class="grid">
+  <section class="card">
+    <div class="card-head">
+      <h2>Срочные задачи</h2>
+      <a href="{% url 'tasks:list' %}">Все →</a>
+    </div>
+    {% for task in urgent_tasks %}
+      <div class="row-item">
+        <span>
+          {{ task.title }}
+          {% if task.client %} · <a href="{{ task.client.get_absolute_url }}">{{ task.client }}</a>{% endif %}
+        </span>
+        <span class="{% if task.is_overdue %}overdue{% endif %}">{{ task.due_at|date:"d.m H:i" }}</span>
+      </div>
+    {% empty %}
+      <p class="muted">Срочных задач нет</p>
+    {% endfor %}
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Последние контакты</h2>
+    </div>
+    {% for item in recent_interactions %}
+      <div class="row-item">
+        <span>
+          <strong>{{ item.get_type_display }}</strong> ·
+          <a href="{{ item.client.get_absolute_url }}">{{ item.client }}</a>
+        </span>
+        <span class="muted">{{ item.happened_at|date:"d.m H:i" }}</span>
+      </div>
+    {% empty %}
+      <p class="muted">Пока нет взаимодействий</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}

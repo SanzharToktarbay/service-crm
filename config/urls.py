@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import include, path
-from django.views.generic import RedirectView
+
+from .views import DashboardView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -8,5 +9,5 @@ urlpatterns = [
     path("clients/", include("clients.urls")),
     path("deals/", include("deals.urls")),
     path("tasks/", include("tasks.urls")),
-    path("", RedirectView.as_view(pattern_name="clients:list", permanent=False)),
+    path("", DashboardView.as_view(), name="dashboard"),
 ]

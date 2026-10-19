@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load l10n %}
 
 {% block title %}Сделки — Service CRM{% endblock %}
 
@@ -10,21 +11,84 @@
 
 <div class="board">
   {% for column in columns %}
-    <div class="board-column">
+    <div class="board-column" data-stage="{{ column.stage }}">
       <div class="board-head">
         <span class="badge badge-{{ column.stage }}">{{ column.label }}</span>
-        <span class="muted">{{ column.deals|length }} · {{ column.total|floatformat:"0g" }} ₸</span>
+        <span class="muted"><span class="board-count">{{ column.deals|length }}</span> · <span class="board-total">{{ column.total|floatformat:"0g" }}</span> ₸</span>
       </div>
-      {% for deal in column.deals %}
-        <a href="{% url 'deals:update' deal.pk %}" class="deal-card">
-          <div class="deal-title">{{ deal.title }}</div>
-          <div class="muted">{{ deal.client }}</div>
-          <div class="deal-amount">{{ deal.amount|floatformat:"0g" }} ₸</div>
-        </a>
-      {% empty %}
-        <p class="muted board-empty">Пусто</p>
-      {% endfor %}
+      <div class="board-cards">
+        {% for deal in column.deals %}
+          <a href="{% url 'deals:update' deal.pk %}" class="deal-card" draggable="true"
+             data-stage-url="{% url 'deals:stage' deal.pk %}" data-amount="{{ deal.amount|unlocalize }}">
+            <div class="deal-title">{{ deal.title }}</div>
+            <div class="muted">{{ deal.client }}</div>
+            <div class="deal-amount">{{ deal.amount|floatformat:"0g" }} ₸</div>
+          </a>
+        {% endfor %}
+      </div>
+      <p class="muted board-empty" {% if column.deals %}hidden{% endif %}>Пусто</p>
     </div>
   {% endfor %}
 </div>
+
+<script>
+  const csrfToken = "{{ csrf_token }}";
+  let dragged = null;
+
+  document.querySelectorAll(".deal-card").forEach(card => {
+    card.addEventListener("dragstart", () => {
+      dragged = card;
+      card.classList.add("dragging");
+    });
+    card.addEventListener("dragend", () => card.classList.remove("dragging"));
+  });
+
+  document.querySelectorAll(".board-column").forEach(column => {
+    column.addEventListener("dragover", event => {
+      event.preventDefault();  // без этого браузер не разрешит бросить карточку сюда
+      column.classList.add("drop-target");
+    });
+    column.addEventListener("dragleave", event => {
+      if (!column.contains(event.relatedTarget)) column.classList.remove("drop-target");
+    });
+    column.addEventListener("drop", async event => {
+      event.preventDefault();
+      column.classList.remove("drop-target");
+      const card = dragged;
+      const oldColumn = card && card.closest(".board-column");
+      if (!card || oldColumn === column) return;
+
+      const body = new URLSearchParams({ stage: column.dataset.stage });
+      if (column.dataset.stage === "lost") {
+        const reason = prompt("Причина отказа:");
+        if (!reason) return;
+        body.append("lost_reason", reason);
+      }
+
+      const response = await fetch(card.dataset.stageUrl, {
+        method: "POST",
+        headers: { "X-CSRFToken": csrfToken },
+        body,
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        alert((data.errors || ["Не удалось переместить сделку"]).join("\n"));
+        return;
+      }
+
+      column.querySelector(".board-cards").prepend(card);
+      updateColumn(oldColumn);
+      updateColumn(column);
+    });
+  });
+
+  function updateColumn(column) {
+    const cards = column.querySelectorAll(".deal-card");
+    let total = 0;
+    cards.forEach(card => total += Number(card.dataset.amount));
+    column.querySelector(".board-count").textContent = cards.length;
+    column.querySelector(".board-total").textContent = total.toLocaleString("ru-RU", { maximumFractionDigits: 0 });
+    column.querySelector(".board-empty").hidden = cards.length > 0;
+  }
+</script>
 {% endblock %}

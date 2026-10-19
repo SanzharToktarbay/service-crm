@@ -135,6 +135,8 @@ input, select, textarea {
 .deal-title { font-weight: 600; margin-bottom: 4px; }
 .deal-amount { margin-top: 8px; font-weight: 600; }
 .board-empty { text-align: center; padding: 20px 0; }
+.deal-card.dragging { opacity: .5; }
+.board-column.drop-target { outline: 2px dashed #2563eb; outline-offset: -2px; }
 
 .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
 .tabs a { padding: 8px 14px; border-radius: 8px; color: #4b5563; }

@@ -1,7 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
+from django.http import JsonResponse
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView
+from django.views.generic.detail import SingleObjectMixin
 
 from clients.mixins import ManagerScopedMixin
 
@@ -61,3 +65,20 @@ class DealUpdateView(LoginRequiredMixin, ManagerScopedMixin, DealFormMixin, Upda
     def form_valid(self, form):
         messages.success(self.request, "Сделка обновлена")
         return super().form_valid(form)
+
+class DealStageView(LoginRequiredMixin, ManagerScopedMixin, SingleObjectMixin, View):
+    """Смена этапа перетаскиванием карточки на доске. Отвечает JSON, а не HTML."""
+
+    model = Deal
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        deal = self.get_object()
+        deal.stage = request.POST.get("stage", "")
+        deal.lost_reason = request.POST.get("lost_reason", deal.lost_reason).strip()
+        try:
+            deal.full_clean()
+        except ValidationError as e:
+            return JsonResponse({"errors": e.messages}, status=400)
+        deal.save()
+        return JsonResponse({"stage": deal.stage})
